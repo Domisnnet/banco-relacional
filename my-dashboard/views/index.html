@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard População</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <!-- Botão de alternância de tema -->
+  <button id="toggle-tema" title="Alternar tema">🌙</button>
+
+  <h1>Top 10 Países por População</h1>
+  <canvas id="popChart" width="600" height="400"></canvas>
+
+  <script>
+    // 🔹 Carrega gráfico com dados da API
+    async function carregarGrafico() {
+      const res = await fetch('/populacao');
+      const dados = await res.json();
+
+      if (!Array.isArray(dados)) {
+        console.error('API retornou algo inesperado:', dados);
+        return;
+      }
+
+      const nomes = dados.map(p => p.country);
+      const populacoes = dados.map(p => p.Population);
+
+      new Chart(document.getElementById('popChart'), {
+        type: 'bar',
+        data: {
+          labels: nomes,
+          datasets: [{
+            label: 'População',
+            data: populacoes,
+            backgroundColor: '#00c4ff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              labels: {
+                color: '#f5f5f5'
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#ccc' },
+              grid: { color: '#333' }
+            },
+            y: {
+              ticks: { color: '#ccc' },
+              grid: { color: '#333' },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    // 🚀 Inicia o gráfico
+    carregarGrafico();
+
+    // 🌗 Alternância de tema
+    const botao = document.getElementById('toggle-tema');
+    const corpo = document.body;
+
+    function aplicarTema(tema) {
+      corpo.classList.remove('tema-claro', 'tema-escuro');
+      corpo.classList.add(tema);
+      botao.textContent = tema === 'tema-escuro' ? '🌙' : '☀️';
+    }
+
+    function alternarTema() {
+      const novoTema = corpo.classList.contains('tema-escuro') ? 'tema-claro' : 'tema-escuro';
+      aplicarTema(novoTema);
+      localStorage.setItem('tema', novoTema);
+    }
+
+    botao.addEventListener('click', alternarTema);
+    aplicarTema(localStorage.getItem('tema') || 'tema-claro');
+  </script>
+</body>
+</html>
